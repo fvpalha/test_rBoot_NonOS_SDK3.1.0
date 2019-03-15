@@ -38,7 +38,7 @@ Accept: */*\r\n\r\n"
 #define FLASH_BY_ADDR 0xff
 
 // callback method should take this format
-typedef void (*ota_callback)(bool result, uint8 rom_slot);
+typedef void (*ota_callback)(bool result, uint8_t rom_slot);
 
 void ICACHE_FLASH_ATTR setOtaHostIp (char *value);
 char* ICACHE_FLASH_ATTR getOtaHostIp (void);

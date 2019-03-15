@@ -49,12 +49,14 @@ SDK_INCDIR := $(addprefix -I$(SDK_BASE)/,$(SDK_INCDIR))
 LIBS    = c gcc hal phy net80211 lwip wpa main pp crypto json
 CFLAGS  = -I. -w -Os -ggdb -std=c99 -g -Wpointer-arith -Wundef \
           -Wall -Werror -Wno-implicit -Wl,-EL -Wno-implicit-function-declaration \
-          -fno-exceptions -fno-inline-functions -nostdlib -mlongcalls \
+          -fno-exceptions -fno-inline-functions -nostdlib -mlongcalls -mno-target-align \
+          -Wextra -Wmissing-prototypes -Wstrict-prototypes \
+          -flto=8 -flto-compression-level=0 -fuse-linker-plugin -ffat-lto-objects -flto-partition=max \
           -mtext-section-literals -ffunction-sections -fdata-sections \
           -fno-builtin-printf -fno-jump-tables -mno-serialize-volatile \
           -fno-guess-branch-probability -freorder-blocks-and-partition -fno-cse-follow-jumps \
           -D__ets__ -DICACHE_FLASH -DUSE_US_TIMER -DUSE_OPTIMIZE_PRINTF
-LDFLAGS = -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-gc-sections -Wl,-static -u Cache_Read_Enable_New 
+LDFLAGS = -nostdlib -u call_user_start -Wl,-gc-sections -Wl,--size-opt -Wl,-static -u Cache_Read_Enable_New 
 
 SRC		:= $(wildcard *.c)
 OBJ		:= $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
@@ -213,7 +215,7 @@ flash-rboot:
 
 flash-sampleproject:
 	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD2) write_flash $(flashimageoptions) 0x02000 $(FIRMW_DIR)/rom0.bin
-	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD2) write_flash $(flashimageoptions) 0x102000 $(FIRMW_DIR)/rom1.bin
+	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD2) write_flash $(flashimageoptions) 0x82000 $(FIRMW_DIR)/rom1.bin
 
 flash-all: clean all erase_flash flash-rboot flash-sampleproject flash-init
 

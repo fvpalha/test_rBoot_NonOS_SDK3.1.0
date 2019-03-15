@@ -45,7 +45,7 @@ void ICACHE_FLASH_ATTR setOtaHostPort (int value) {
 void ICACHE_FLASH_ATTR rboot_ota_deinit() {
 
 	bool result;
-	uint8 rom_slot;
+	uint8_t rom_slot;
 	ota_callback callback;
 	struct espconn *conn;
 
@@ -103,7 +103,11 @@ static void ICACHE_FLASH_ATTR upgrade_recvcb(void *arg, char *pusrdata, unsigned
 			// running total of download length
 			upgrade->total_len += length;
 			// process current chunk
-			rboot_write_flash(&upgrade->write_status, (uint8*)ptrData, length);
+			if (!rboot_write_flash(&upgrade->write_status, (uint8_t*)ptrData, length)) {
+				// write error
+				rboot_ota_deinit();
+				return;
+			}
 			// work out total download size
 			ptrLen += 16;
 			ptr = (char *)os_strstr(ptrLen, "\r\n");
@@ -117,7 +121,11 @@ static void ICACHE_FLASH_ATTR upgrade_recvcb(void *arg, char *pusrdata, unsigned
 	} else {
 		// not the first chunk, process it
 		upgrade->total_len += length;
-		rboot_write_flash(&upgrade->write_status, (uint8*)pusrdata, length);
+		if (!rboot_write_flash(&upgrade->write_status, (uint8_t*)pusrdata, length)) {
+			// write error
+			rboot_ota_deinit();
+			return;
+		}
 	}
 
 	// check if we are finished
@@ -166,7 +174,7 @@ static void ICACHE_FLASH_ATTR upgrade_disconcb(void *arg) {
 // successfully connected to update server, send the request
 static void ICACHE_FLASH_ATTR upgrade_connect_cb(void *arg) {
 
-	uint8 *request;
+	uint8_t *request;
 
 	// disable the timeout
 	os_timer_disarm(&ota_timer);
@@ -176,7 +184,7 @@ static void ICACHE_FLASH_ATTR upgrade_connect_cb(void *arg) {
 	espconn_regist_recvcb(upgrade->conn, upgrade_recvcb);
 
 	// http request string
-	request = (uint8 *)os_malloc(512);
+	request = (uint8_t *)os_malloc(512);
 	if (!request) {
 //		uart0_send("No ram!\r\n");
 		rboot_ota_deinit();
@@ -188,7 +196,7 @@ static void ICACHE_FLASH_ATTR upgrade_connect_cb(void *arg) {
 */
 	os_sprintf((char*)request,
 		"GET /%s HTTP/1.1\r\nHost: %s\r\n" HTTP_HEADER,
-		(upgrade->rom_slot == FLASH_BY_ADDR ? OTA_FILE : (upgrade->rom_slot == 0 ? OTA_ROM0 : OTA_ROM1)), ota_host_ip);
+			(upgrade->rom_slot == FLASH_BY_ADDR ? OTA_FILE : (upgrade->rom_slot == 0 ? OTA_ROM0 : OTA_ROM1)), ota_host_ip);
 
 	// send the http request, with timeout for reply
 	os_timer_setfn(&ota_timer, (os_timer_func_t *)rboot_ota_deinit, 0);
@@ -279,7 +287,7 @@ static void ICACHE_FLASH_ATTR upgrade_resolved(const char *name, ip_addr_t *ip, 
 // start the ota process, with user supplied options
 bool ICACHE_FLASH_ATTR rboot_ota_start(ota_callback callback) {
 
-	uint8 slot;
+	uint8_t slot;
 	rboot_config bootconf;
 	err_t result;
 

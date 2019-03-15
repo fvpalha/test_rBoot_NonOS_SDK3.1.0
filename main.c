@@ -32,12 +32,12 @@
 #define USER_CONFIG_SECTOR_OTA		0xfa
 #define USER_CONFIG_OFFSET			0xfa000
 #define OFFSET_OTA_BOOT				0x000000
-#define SIZE_OTA_BOOT				0x1000
-#define OFFSET_OTA_RBOOT_CFG		0x001000
+#define SIZE_OTA_BOOT				0x2000
+#define OFFSET_OTA_RBOOT_CFG		0x1000
 #define SIZE_OTA_RBOOT_CFG			0x1000
-#define OFFSET_OTA_IMG_0			0x002000
-#define OFFSET_OTA_IMG_1			0x102000
-#define SIZE_OTA_IMG				0x0f4000
+#define OFFSET_OTA_IMG_0			0x02000
+#define OFFSET_OTA_IMG_1			0x82000
+#define SIZE_OTA_IMG				0x7E000
 #define SEQUENCER_FLASH_OFFSET_0	0x0f6000
 #define SEQUENCER_FLASH_OFFSET_1	0x1f6000
 #define SEQUENCER_FLASH_SIZE		0x4000
@@ -51,8 +51,8 @@ static const partition_item_t p_table[] = {
 		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 2,	OFFSET_OTA_RBOOT_CFG,		SIZE_OTA_RBOOT_CFG,		},
 		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 3,	OFFSET_OTA_IMG_0,			SIZE_OTA_IMG,			},
 		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 4,	OFFSET_OTA_IMG_1,			SIZE_OTA_IMG,			},
-		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 5,	SEQUENCER_FLASH_OFFSET_0,	SEQUENCER_FLASH_SIZE,	},
-		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 6,	SEQUENCER_FLASH_OFFSET_1,	SEQUENCER_FLASH_SIZE,	},
+//		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 5,	SEQUENCER_FLASH_OFFSET_0,	SEQUENCER_FLASH_SIZE,	},
+//		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 6,	SEQUENCER_FLASH_OFFSET_1,	SEQUENCER_FLASH_SIZE,	},
 };
 
 void user_pre_init(void)
@@ -75,6 +75,13 @@ void user_pre_init(void)
 void ICACHE_FLASH_ATTR user_rf_pre_init() {
 	system_phy_set_powerup_option(3); // 3: full RF calibration on reset (200ms)
 }
+/*
+uint32 user_iram_memory_is_enabled(void);
+iram attr_const uint32 user_iram_memory_is_enabled(void)
+{
+    return(0);
+}
+*/
 
 void ICACHE_FLASH_ATTR user_init(void) {
 	char msg[50];
