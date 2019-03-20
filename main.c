@@ -16,7 +16,7 @@
 #define SDK_PRIV_PARAM_ADDR 0x7C000
 #define SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM SYSTEM_PARTITION_CUSTOMER_BEGIN
 */
-
+/*
 #define FLASH_SIZE_SDK				FLASH_SIZE_32M_MAP_512_512
 #define SPI_FLASH_SIZE_MAP			FLASH_SIZE_32M_MAP_512_512
 #define USER_CONFIG_SIZE			0x1000
@@ -62,7 +62,7 @@ void user_pre_init(void)
         while(1);
     }
 }
-
+*/
 /*void user_pre_init(void);
 void user_pre_init(void)
 {

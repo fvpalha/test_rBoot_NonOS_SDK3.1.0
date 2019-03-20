@@ -39,6 +39,11 @@ OBJDUMP := $(addprefix $(XTENSA_BINDIR)/,xtensa-lx106-elf-objdump)
 ELF_SIZE := $(addprefix $(XTENSA_BINDIR)/,xtensa-lx106-elf-size)
 endif
 
+# libmain must be modified for rBoot big flash support (just one symbol gets weakened)
+LIBMAIN = main2
+LIBMAIN_DST = $(addprefix $(BUILD_DIR)/,libmain2.a)
+LIBMAIN_SRC = $(addprefix $(SDK_LIBDIR)/,libmain.a)
+
 BUILD_DIR = build
 FIRMW_DIR = firmware
 
@@ -46,7 +51,7 @@ SDK_LIBDIR := $(addprefix $(SDK_BASE)/,$(SDK_LIBDIR))
 SDK_INCDIR := $(addprefix -I$(SDK_BASE)/,$(SDK_INCDIR))
 
 
-LIBS    = c gcc hal phy net80211 lwip wpa main pp crypto json
+LIBS    = c gcc hal phy net80211 lwip wpa $(LIBMAIN) pp crypto json
 CFLAGS  = -I. -w -Os -ggdb -std=c99 -g -Wpointer-arith -Wundef \
           -Wall -Werror -Wno-implicit -Wl,-EL -Wno-implicit-function-declaration \
           -fno-exceptions -fno-inline-functions -nostdlib -mlongcalls -mno-target-align \
@@ -55,7 +60,7 @@ CFLAGS  = -I. -w -Os -ggdb -std=c99 -g -Wpointer-arith -Wundef \
           -mtext-section-literals -ffunction-sections -fdata-sections \
           -fno-builtin-printf -fno-jump-tables -mno-serialize-volatile \
           -fno-guess-branch-probability -freorder-blocks-and-partition -fno-cse-follow-jumps \
-          -D__ets__ -DICACHE_FLASH -DUSE_US_TIMER -DUSE_OPTIMIZE_PRINTF
+          -D__ets__ -DICACHE_FLASH -DUSE_US_TIMER -DUSE_OPTIMIZE_PRINTF -DBOOT_BIG_FLASH
 LDFLAGS = -nostdlib -u call_user_start -Wl,-gc-sections -Wl,--size-opt -Wl,-static -u Cache_Read_Enable_New 
 
 SRC		:= $(wildcard *.c)
@@ -174,7 +179,7 @@ MEM_USAGE = \
 C_FILES = $(wildcard *.c)
 O_FILES = $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_FILES))
 
-all: $(BUILD_DIR) $(FIRMW_DIR) $(FIRMW_DIR)/rom0.bin $(FIRMW_DIR)/rom1.bin
+all: $(BUILD_DIR) $(FIRMW_DIR) $(LIBMAIN_DST) $(FIRMW_DIR)/rom0.bin
 
 $(BUILD_DIR)/%.o: %.c %.h
 	@echo "$(CC) $(SDK_INCDIR) $(CFLAGS) -o $@ -c $<"
@@ -204,6 +209,10 @@ $(FIRMW_DIR)/%.bin: $(BUILD_DIR)/%.elf
 	@$(ESPTOOL) image_info $@
 	@echo "------------------------------------------------------------------------------\n\n"
 
+$(LIBMAIN_DST): $(LIBMAIN_SRC)
+	@echo "OC $(notdir $@)"
+	@$(OBJCOPY) -W Cache_Read_Enable_New $^ $@
+
 $(BUILD_DIR):
 	@mkdir -p $@
 
@@ -215,7 +224,6 @@ flash-rboot:
 
 flash-sampleproject:
 	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD2) write_flash $(flashimageoptions) 0x02000 $(FIRMW_DIR)/rom0.bin
-	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD2) write_flash $(flashimageoptions) 0x82000 $(FIRMW_DIR)/rom1.bin
 
 flash-all: clean all erase_flash flash-rboot flash-sampleproject flash-init
 

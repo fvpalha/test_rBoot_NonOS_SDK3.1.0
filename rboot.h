@@ -26,7 +26,7 @@ extern "C" {
 #define BOOT_CONFIG_CHKSUM
 
 // uncomment to enable big flash support (>1MB)
-//#define BOOT_BIG_FLASH
+#define BOOT_BIG_FLASH
 
 // uncomment to enable 2 way communication between
 // rBoot and the user app via the esp rtc data area
@@ -147,8 +147,8 @@ typedef struct {
 #ifdef BOOT_CUSTOM_DEFAULT_CONFIG
 static uint8_t default_config(rboot_config *romconf, uint32_t flashsize) {
 	romconf->count = 2;
-	romconf->roms[0] = 0x02000;
-	romconf->roms[1] = 0x82000;
+	romconf->roms[0] = SECTOR_SIZE * (BOOT_CONFIG_SECTOR + 1);
+	romconf->roms[1] = (flashsize / 2) + (SECTOR_SIZE * (BOOT_CONFIG_SECTOR + 1));
 }
 #endif
 
