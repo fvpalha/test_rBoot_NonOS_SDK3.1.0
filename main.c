@@ -16,7 +16,7 @@
 #define SDK_PRIV_PARAM_ADDR 0x7C000
 #define SYSTEM_PARTITION_CUSTOMER_PRIV_PARAM SYSTEM_PARTITION_CUSTOMER_BEGIN
 */
-/*
+
 #define FLASH_SIZE_SDK				FLASH_SIZE_32M_MAP_512_512
 #define SPI_FLASH_SIZE_MAP			FLASH_SIZE_32M_MAP_512_512
 #define USER_CONFIG_SIZE			0x1000
@@ -32,12 +32,12 @@
 #define USER_CONFIG_SECTOR_OTA		0xfa
 #define USER_CONFIG_OFFSET			0xfa000
 #define OFFSET_OTA_BOOT				0x000000
-#define SIZE_OTA_BOOT				0x2000
+#define SIZE_OTA_BOOT				0x1000
 #define OFFSET_OTA_RBOOT_CFG		0x1000
 #define SIZE_OTA_RBOOT_CFG			0x1000
-#define OFFSET_OTA_IMG_0			0x02000
-#define OFFSET_OTA_IMG_1			0x82000
-#define SIZE_OTA_IMG				0x7E000
+#define OFFSET_OTA_IMG_0			0x002000
+#define OFFSET_OTA_IMG_1			0x202000
+#define SIZE_OTA_IMG				0xF0000
 #define SEQUENCER_FLASH_OFFSET_0	0x0f6000
 #define SEQUENCER_FLASH_OFFSET_1	0x1f6000
 #define SEQUENCER_FLASH_SIZE		0x4000
@@ -51,27 +51,27 @@ static const partition_item_t p_table[] = {
 		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 2,	OFFSET_OTA_RBOOT_CFG,		SIZE_OTA_RBOOT_CFG,		},
 		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 3,	OFFSET_OTA_IMG_0,			SIZE_OTA_IMG,			},
 		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 4,	OFFSET_OTA_IMG_1,			SIZE_OTA_IMG,			},
-//		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 5,	SEQUENCER_FLASH_OFFSET_0,	SEQUENCER_FLASH_SIZE,	},
-//		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 6,	SEQUENCER_FLASH_OFFSET_1,	SEQUENCER_FLASH_SIZE,	},
+		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 5,	SEQUENCER_FLASH_OFFSET_0,	SEQUENCER_FLASH_SIZE,	},
+		{	SYSTEM_PARTITION_CUSTOMER_BEGIN + 6,	SEQUENCER_FLASH_OFFSET_1,	SEQUENCER_FLASH_SIZE,	},
 };
 
-void user_pre_init(void)
+void user_pre_init(void);
+/*void user_pre_init(void)
 {
     if(!system_partition_table_regist(p_table, sizeof(p_table)/sizeof(p_table[0]), SPI_FLASH_SIZE_MAP)) {
         os_printf("system_partition_table_regist fail\r\n");
         while(1);
     }
-}
-*/
-/*void user_pre_init(void);
+}*/
+
 void user_pre_init(void)
 {
-	io_gpio_reset_all_pins();
-
-	stat_flags.user_pre_init_called = 1;
-	stat_flags.user_pre_init_success = system_partition_table_regist(p_table, sizeof(p_table) / sizeof(*p_table), FLASH_SIZE_SDK);
+    if(!system_partition_table_regist(p_table, sizeof(p_table) / sizeof(*p_table), FLASH_SIZE_SDK)) {
+        os_printf("system_partition_table_regist fail\r\n");
+        while(1);
+    }
 }
-*/
+
 void ICACHE_FLASH_ATTR user_rf_pre_init() {
 	system_phy_set_powerup_option(3); // 3: full RF calibration on reset (200ms)
 }
