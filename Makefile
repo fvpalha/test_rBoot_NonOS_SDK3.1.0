@@ -231,7 +231,7 @@ flash-all2: all flash-rboot flash-sampleproject flash-init
 
 flash-init:
 	$(ESPTOOL) -p $(ESPPORT) -b $(ESPBAUD2) write_flash $(flashimageoptions) \
-		0x3fc000 $(SDK_BASE)/bin/esp_init_data_default_v08.bin
+		0x1fc000 $(SDK_BASE)/bin/esp_init_data_default_v08.bin
 
 flash-only: erase_flash flash-rboot flash-sampleproject flash-init
 
@@ -260,7 +260,7 @@ param-flash:
 rebuild: clean all
 
 monitor:
-	minicom
+	picocom -b115200 $(ESPPORT)
 
 clean:
 	@echo "RM $(BUILD_DIR) $(FIRMW_DIR)"

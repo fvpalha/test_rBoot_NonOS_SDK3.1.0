@@ -3,7 +3,7 @@
 
 #include "server.h"
 
-static const char *VERSION_EAS = "2019MAR20_SDK3";
+static const char *VERSION_EAS = "2019MAR21_SDK3";
 
 // values will be passed in from the Makefile
 #ifndef WIFI_SSID
